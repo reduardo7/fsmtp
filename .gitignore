@@ -1,0 +1,5 @@
+mails/**
+mails/*
+!mails/.gitinclude
+fakeSMTP*.jar
+fakeSMTP.jar

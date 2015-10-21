@@ -1,0 +1,44 @@
+#!/bin/bash
+# https://nilhcem.github.io/FakeSMTP/
+# https://nilhcem.github.io/FakeSMTP/download.html
+
+# Test if running with "bash" interpreter.
+if [ -z "$BASH" ]; then
+	bash "$0" "$@"
+	exit $?
+fi
+
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+MAIL_PATH="$DIR/mails"
+PORT="25"
+
+if ! type mail &> /dev/null
+	then
+		sudo apt-get install mailutils
+	fi
+
+if ! type unzip &> /dev/null
+	then
+		sudo apt-get install unzip
+	fi
+
+if [ ! -f "$DIR/fakeSMTP.jar" ]; then
+	CDIR="$(pwd)"
+	cd $DIR
+	wget -q http://nilhcem.github.com/FakeSMTP/downloads/fakeSMTP-latest.zip && \
+		unzip fakeSMTP-latest.zip -d ./ && \
+		rm -f fakeSMTP-latest.zip && \
+		mv -v fakeSMTP-*.jar fakeSMTP.jar
+	cd "$CDIR"
+fi
+
+echo
+echo Satart fSMTP - FakeSMTP
+echo
+echo "Port:      $PORT"
+echo "Mail Path: $MAIL_PATH"
+echo "Test:      echo 'Hello world!' | mail -s 'Test mail' test@fsmtp.com"
+echo
+
+sudo service sendmail stop
+sudo java -jar $DIR/fakeSMTP.jar -s -p $PORT -o "$MAIL_PATH"
