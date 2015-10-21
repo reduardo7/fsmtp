@@ -11,6 +11,7 @@ fi
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 MAIL_PATH="$DIR/mails"
 PORT="25"
+H="$(cat /etc/hostname)"
 
 if ! type mail &> /dev/null
 	then
@@ -31,6 +32,13 @@ if [ ! -f "$DIR/fakeSMTP.jar" ]; then
 		mv -v fakeSMTP-*.jar fakeSMTP.jar
 	cd "$CDIR"
 fi
+
+if ! grep "$H" /etc/hosts > /dev/null
+	then
+		echo "Fix hosts file"
+		echo "Add $H to host file"
+		sudo echo "127.0.0.1 $H" > /etc/hosts
+  fi
 
 echo
 echo Satart fSMTP - FakeSMTP
