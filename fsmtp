@@ -18,12 +18,13 @@ if ! type mail &> /dev/null
 		sudo apt-get install mailutils
 	fi
 
-if ! type unzip &> /dev/null
-	then
-		sudo apt-get install unzip
-	fi
-
 if [ ! -f "$DIR/fakeSMTP.jar" ]; then
+	if ! type unzip &> /dev/null
+		then
+			echo "Installing unzip..."
+			sudo apt-get install unzip
+		fi
+
 	CDIR="$(pwd)"
 	cd $DIR
 	wget -q http://nilhcem.github.com/FakeSMTP/downloads/fakeSMTP-latest.zip && \
@@ -40,13 +41,27 @@ if ! grep "$H" /etc/hosts > /dev/null
 		sudo echo "127.0.0.1 $H" > /etc/hosts
   fi
 
-echo
-echo Satart fSMTP - FakeSMTP
-echo
-echo "Port:      $PORT"
-echo "Mail Path: $MAIL_PATH"
-echo "Test:      echo 'Hello world!' | mail -s 'Test mail' test@fsmtp.com"
-echo
+isUI=false
+[ "$1" = "ui" ] && isUI=true
 
-sudo service sendmail stop
-sudo java -jar $DIR/fakeSMTP.jar -s -p $PORT -o "$MAIL_PATH"
+xsu() {
+	if $isUI; then
+		gksu --description "$1" "$2"
+	else
+		echo "Exec: $1"
+		sudo $2
+	fi
+}
+
+if ! $isUI ; then
+	echo
+	echo Satart fSMTP - FakeSMTP
+	echo
+	echo "Port:      $PORT"
+	echo "Mail Path: $MAIL_PATH"
+	echo "Test:      echo 'Hello world!' | mail -s 'Test mail' test@fsmtp.com"
+	echo
+fi
+
+xsu "Stop SendMail" "service sendmail stop"
+xsu "fSMTP - fakeSMTP" "java -jar $DIR/fakeSMTP.jar -s -p $PORT -o '$MAIL_PATH'"
