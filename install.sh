@@ -40,3 +40,16 @@ else
   echo "Encoding=UTF-8" >> $destLnk
   echo "Categories=Network;Application;Mail;Smtp" >> $destLnk
 fi
+
+# Fix Slow Start/Send
+# http://www.devraju.com/php/slow-email-sending-in-ubuntu-12-04-lts-solution/
+u="127.0.0.1"
+l="$(cat /etc/hostname)"
+if ! grep "$l" /etc/hosts > /dev/null
+  then
+    sudo bash -c "echo '$u $l' >> /etc/hosts"
+  fi
+
+if [ -f /etc/mail/sendmail.cf ]; then
+  sudo sed -i '/^\#O HostsFile=/cO HostsFile=/' /etc/mail/sendmail.cf
+fi
